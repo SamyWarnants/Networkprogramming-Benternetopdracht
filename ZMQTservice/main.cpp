@@ -1,80 +1,68 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <nzmqt/nzmqt.hpp>
-#include <nzmqt/impl.hpp>
 #include <QCoreApplication>
-#include <QString>
-#include <QTimer>
-#include <QThread>
-#include <QDateTime>
+#include <unordered_map>
+
+int secretNumber;  // Random number to guess
+std::unordered_map<std::string, bool> playerStatus;  // Track players who guessed correctly
+
+void generateNewNumber() {
+    secretNumber = rand() % 11;  // Random number between 0 and 10
+    std::cout << "New secret number generated: " << secretNumber << std::endl;
+}
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
-    std::cout << "Prep!" << std::endl;
+    QCoreApplication app(argc, argv);
+    srand(time(nullptr));  // Seed random number
+    generateNewNumber();
 
     try
     {
-        nzmqt::ZMQContext *context = nzmqt::createDefaultContext(&a);
-        nzmqt::ZMQSocket *pusher = context->createSocket(nzmqt::ZMQSocket::TYP_PUSH, context);
-        nzmqt::ZMQSocket *subscriber = context->createSocket(nzmqt::ZMQSocket::TYP_SUB, context);
+        nzmqt::ZMQContext *context = nzmqt::createDefaultContext(&app);
+        nzmqt::ZMQSocket *puller = context->createSocket(nzmqt::ZMQSocket::TYP_PULL, context);
+        nzmqt::ZMQSocket *publisher = context->createSocket(nzmqt::ZMQSocket::TYP_PUB, context);
 
-        // Handle received messages
-        QObject::connect(subscriber, &nzmqt::ZMQSocket::messageReceived, [](const QList<QByteArray>& messages)
-                         {
-                             if (messages.size() < 1) {
-                                 std::cout << "Received empty message!" << std::endl;
-                             } else {
-                                 std::cout << "Received: " << messages.constFirst().toStdString() << std::endl;
-                             }
-                         });
+        puller->bindTo("tcp://*:24041"); // Clients send guesses here
+        publisher->bindTo("tcp://*:24042"); // Server broadcasts responses here
 
-        // Timer to send "Aardappel" every 5 seconds
-        QTimer *aardappelTimer = new QTimer(context);
-        QObject::connect(aardappelTimer, &QTimer::timeout, [pusher]() {
-            QByteArray message = "Aardappel";
-            pusher->sendMessage(message);
-            std::cout << "Sent: Aardappel" << std::endl;
-        });
-        aardappelTimer->setInterval(5000); // Every 5 seconds
-        aardappelTimer->start();
+        QObject::connect(puller, &nzmqt::ZMQSocket::messageReceived, [publisher](const QList<QByteArray> &messages) {
+            for (const QByteArray &message : messages) {
+                std::string msgStr = message.toStdString();
+                std::cout << "Received: " << msgStr << std::endl;
 
-        // Thread to handle manual user input
-        QThread *thread = QThread::create([pusher] {
-            QTextStream s(stdin);
-            while (true) {
-                QString input = s.readLine();
-                pusher->sendMessage(input.toUtf8());
-                std::cout << "Message sent: " << input.toStdString() << std::endl;
+                if (msgStr.rfind("guess>", 0) == 0) {
+                    std::string username = msgStr.substr(6, msgStr.find(">") - 6);
+                    int guess = std::stoi(msgStr.substr(msgStr.find(">") + 1));
+
+                    std::string responseTopic = "result>" + username + ">";
+                    std::string response;
+
+                    if (guess == secretNumber) {
+                        response = responseTopic + "Correct! You guessed the number!";
+                        std::cout << username << " guessed correctly!" << std::endl;
+                        generateNewNumber();  // Reset game
+                    } else if (guess < secretNumber) {
+                        response = responseTopic + "Too low! Try again.";
+                    } else {
+                        response = responseTopic + "Too high! Try again.";
+                    }
+
+                    publisher->sendMessage(QByteArray::fromStdString(response));
+                    std::cout << "Sent: " << response << std::endl;
+                }
             }
         });
-
-        // Connect sockets to Benternet
-        pusher->connectTo("tcp://benternet.pxl-ea-ict.be:24041");
-        subscriber->connectTo("tcp://benternet.pxl-ea-ict.be:24042");
-
-        // Subscribe to all messages
-        if (argc > 1) {
-            for (int i = 1; i < argc; i++) {
-                subscriber->subscribeTo(argv[i]);
-            }
-        } else {
-            subscriber->subscribeTo("");
-        }
-
-        // Check connections
-        if (!pusher->isConnected() || !subscriber->isConnected()) {
-            std::cerr << "NOT CONNECTED!!!" << std::endl;
-        }
 
         context->start();
-        thread->start();
-
     }
-    catch (nzmqt::ZMQException &ex)
+    catch (const nzmqt::ZMQException &ex)
     {
-        std::cerr << "Caught an exception: " << ex.what() << std::endl;
+        std::cerr << "Exception caught: " << ex.what() << std::endl;
     }
 
-    std::cout << "Start!" << std::endl;
-    return a.exec();
+    std::cout << "Number Guessing Game Server Started!" << std::endl;
+    return app.exec();
 }
