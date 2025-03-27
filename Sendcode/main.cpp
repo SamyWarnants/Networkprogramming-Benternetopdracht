@@ -128,5 +128,3 @@ int main( int argc, char *argv[] )
     std::cout << "Start!" << std::endl;
     return a.exec();
 }
-message.txt
-6 KB
