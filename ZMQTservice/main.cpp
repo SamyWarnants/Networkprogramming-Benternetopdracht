@@ -47,7 +47,7 @@ void processGuess(const QString& message, nzmqt::ZMQSocket* pusher)
 
 void sendAnnouncement(nzmqt::ZMQSocket* pusher)
 {
-    QString message = ANNOUNCEMENT_TOPIC + "Welcome to the number guessing game. Send 'example>guess?>[your_name]>[number]' to play.";
+    QString message = ANNOUNCEMENT_TOPIC + "Welcome to the number guessing game. Send 'example>guess?>your_name>number' to play.";
     pusher->sendMessage(message.toUtf8());
     std::cout << "Announcement sent to all users." << std::endl;
 }
