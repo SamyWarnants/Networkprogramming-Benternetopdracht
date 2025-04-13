@@ -131,7 +131,7 @@ sequenceDiagram
     Client->>Benternet: SUB Tamagotchiland>CreatePet!>Login
     Benternet-->>Client: PUB Tamagotchiland>CreatePet?>Larry
 
-    alt ✅ Pet creation successful
+    alt ✅ Pet creation successfull
         Benternet-->>Client: Hi thank you for creating me! Go to Tamagotchiland>PetPark!>Larry
     else ❌ Creation failed
         Benternet-->>Client: Oh no, dark magic failed. Please try again
