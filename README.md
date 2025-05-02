@@ -5,7 +5,7 @@
 
 ## About the project
 
-What I hope to achieve with this project is to make a **Tamagotchiland** that works on the Benternet. When the user logs in they can name their pet and the game will start. Not all features will currently work of the Tamagotchi since each one can differs a lot in functionality. That is why the focus will be on the most basic features. Hunger levels, happiness levels, hygiene levels and a minigame. After some time has passed and the Tamagotchi is not fed, cleaned or happy enough it will remind the user 3 times. When that hasn't happend the animal will say goodbye and **die**. To entertain the Tamagotchi the user will be able to play a numbergame this will raise their happiness level since they love guessing :).
+What I hope to achieve with this project is to make a **Tamagotchiland** that works on the Benternet. When the user logs in they can name their pet and the game will start. Not all features will currently work of the Tamagotchi since each one can differs a lot in functionality. That is why the focus will be on the most basic features. Hunger levels, happiness levels, hygiene levels and a minigame. After some time has passed and the Tamagotchi is not fed, cleaned or happy enough it will remind the user 3 times. When that hasn't happend the animal will say goodbye and **die**. To entertain the Tamagotchi the user will be able to play a number game this will raise their happiness level since they love guessing :). It may be that there will be a GUI but that is not sure as of right now.
 
 **Sequence of operation**:
 
@@ -69,7 +69,7 @@ What I hope to achieve with this project is to make a **Tamagotchiland** that wo
 
          
 
-   4. When the pet is not kept properly it will say "HEY ATTENTION PLEASE" which will repeat 3 times with a delay of 10 minutes between each calls until the Pet passes away. Trying to access the pet will not work and say The pet has died.
+   4. When the pet is not kept properly it will say ``Tamagotchiland>PetPark?>Larry>PetAttention>HEY ATTENTION PLEASE`` which will repeat 3 times with a delay of 10 minutes between each calls until the Pet passes away. Trying to access the pet will not work and say The pet has died.
 
    5. Finally there is the option for logs ``Tamagotchiland>PetPark!>Larry>Logs``. By doing this it will give the user a log of all interactions.
 
@@ -128,51 +128,60 @@ sequenceDiagram
     participant Benternet
 
     %% CreatePet flow
-    Client->>Benternet: SUB Tamagotchiland>CreatePet!>Login
-    Benternet-->>Client: PUB Tamagotchiland>CreatePet?>Larry
+    Client->>Benternet: SUB: Tamagotchiland>CreatePet!>Login
+    Benternet-->>Client: PUB: Tamagotchiland>CreatePet?>Larry
 
     alt ✅ Pet creation successfull
-        Benternet-->>Client: Hi thank you for creating me! Go to Tamagotchiland>PetPark!>Larry
+        Benternet-->>Client: Tamagotchiland>CreatePet?>Hi thank you for creating me! Go to "Tamagotchiland>PetPark!>Larry"
     else ❌ Creation failed
-        Benternet-->>Client: Oh no, dark magic failed. Please try again
+        Benternet-->>Client: Tamagotchiland>CreatePet?>"Oh no, dark magic failed. Please try again"
     end
 
     %% Enter PetPark
-    Client->>Benternet: SUB Tamagotchiland>PetPark!>Larry
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry
 
     %% Stats
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Stats
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Stats>Happiness>100%
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Stats>Hunger>100%
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Stats>Hygiene>100%
-
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Stats (these are the options)
+    
+	alt Happyiness
+	Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Stats>Happiness
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Stats>Happiness>100%
+    else Hunger
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Stats>hunger
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Stats>Hunger>100%
+    else Hygiene
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Stats>Hygiene
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Stats>Hygiene>100%
+	end
     %% Play
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Play
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Play>Okay I have a number start guessing
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Play
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Play>Okay I have a number start guessing
     loop Guessing
-        Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Play>[0-10]
-        Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Play>Y/N
+        Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Play>1
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Play>N
+        Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Play>2
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Play>Y
     end
 
     %% Petcare
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Petcare
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Petcare>Feeding
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Petcare>Thank you for Feeding me!
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Petcare>Cleaning
-    Benternet-->>Client: Tamagotchiland>PetPark?>Larry>Petcare>Thank you for Cleaning me!
+    Client->>Benternet: PUB: Tamagotchiland>PetPark!>Larry>Petcare
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Petcare>Feeding
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Petcare>Thank you for Feeding me!
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Petcare>Cleaning
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Petcare>Thank you for Cleaning me!
 
     %% Logs
-    Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry>Logs
-    Benternet-->>Client: [Interaction logs]
+    Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry>Logs
+    Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>Logs[History of the chatlogs]
 
     %% Neglect
     alt ❌ Pet neglected too long
-        Benternet-->>Client: HEY ATTENTION PLEASE
-        Benternet-->>Client: HEY ATTENTION PLEASE
-        Benternet-->>Client: HEY ATTENTION PLEASE
-        Benternet-->>Client: The pet has died
-        Client->>Benternet: PUB Tamagotchiland>PetPark!>Larry
-        Benternet-->>Client: The pet has died
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>PetAttention>HEY ATTENTION PLEASE
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>PetAttention>HEY ATTENTION PLEASE
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>PetAttention>HEY ATTENTION PLEASE
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>PetAttention>The pet has died
+        Client->>Benternet: SUB: Tamagotchiland>PetPark!>Larry
+        Benternet-->>Client: PUB: Tamagotchiland>PetPark?>Larry>PetAttention>The pet has died
     end
 ```
 
@@ -190,7 +199,7 @@ To run the project, follow these steps:
    
    - (For Windows it is setup like this):
      ![Overview](./Resources/qtsetup.png)
-3. **Now you can go to the project folder and open the project inside of it.**:
+3. **Now you can go to the project folder and open the project inside of it**:
 4. **Now you can run the game! Congratulations!! (It can be that the terminal won't let you have input to fix this go to projects=>Run=> and enable run in terminal.**
 
 
