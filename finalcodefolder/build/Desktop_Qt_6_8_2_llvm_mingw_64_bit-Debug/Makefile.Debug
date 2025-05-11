@@ -119,8 +119,8 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-debug/main.o: ../../main.cpp ../../../include/nzmqt/nzmqt.hpp \
-		../../../include/nzmqt/global.hpp \
+debug/main.o: ../../main.cpp C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QCoreApplication \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreapplication.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qglobal.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtversionchecks.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtconfiginclude.h \
@@ -166,15 +166,15 @@ debug/main.o: ../../main.cpp ../../../include/nzmqt/nzmqt.hpp \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtresource.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qttranslation.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qversiontagging.h \
-		../../../include/zmq.hpp \
-		../../../include/zmq.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QByteArray \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearray.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qrefcount.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qnamespace.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstring.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qchar.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcompare.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcomparehelpers.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/q20type_traits.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringview.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearray.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qrefcount.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qnamespace.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtmetamacros.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qarraydata.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qpair.h \
@@ -187,13 +187,6 @@ debug/main.o: ../../main.cpp ../../../include/nzmqt/nzmqt.hpp \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearrayalgorithms.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearrayview.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringfwd.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QFlag \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QList \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qlist.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qhashfunctions.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstring.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qchar.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringview.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringliteral.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringalgorithms.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qlatin1stringview.h \
@@ -203,42 +196,35 @@ debug/main.o: ../../main.cpp ../../../include/nzmqt/nzmqt.hpp \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringbuilder.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringconverter.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringconverter_base.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qiterator.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearraylist.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringlist.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qalgorithms.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringmatcher.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMetaType \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreevent.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobjectdefs.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobjectdefs_impl.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfunctionaltools_impl.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qdeadlinetimer.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qelapsedtimer.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qmetatype.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qdatastream.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qscopedpointer.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qiodevicebase.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfloat16.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qhashfunctions.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qmath.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qalgorithms.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qiterable.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qmetacontainer.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcontainerinfo.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtaggedpointer.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobjectdefs.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobjectdefs_impl.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfunctionaltools_impl.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qscopeguard.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMutex \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qmutex.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qdeadlinetimer.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qelapsedtimer.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtsan_impl.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QObject \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qeventloop.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobject.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreevent.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qlist.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qiterator.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbytearraylist.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringlist.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qstringmatcher.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qobject_impl.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbindingstorage.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QRunnable \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qrunnable.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QVector \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qvector.h \
-		../../../include/nzmqt/impl.hpp \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QDebug \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qnativeinterface.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qdebug.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtextstream.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcontiguouscache.h \
@@ -250,33 +236,47 @@ debug/main.o: ../../main.cpp ../../../include/nzmqt/nzmqt.hpp \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qset.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qhash.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qvarlengtharray.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreapplication_platform.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfuture.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfutureinterface.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qmutex.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtsan_impl.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qresultstore.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfuture_impl.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qthreadpool.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qthread.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qrunnable.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qexception.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qpromise.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qvariant.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/q23utility.h \
+		../../../include/nzmqt/nzmqt.hpp \
+		../../../include/nzmqt/global.hpp \
+		../../../include/zmq.hpp \
+		../../../include/zmq.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QByteArray \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QFlag \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QList \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMetaType \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMutex \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QObject \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QRunnable \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QVector \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qvector.h \
+		../../../include/nzmqt/impl.hpp \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QDebug \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMutexLocker \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QSocketNotifier \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qsocketnotifier.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QTimer \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qtimer.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qbasictimer.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QCoreApplication \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreapplication.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qeventloop.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qnativeinterface.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcoreapplication_platform.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfuture.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfutureinterface.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qresultstore.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qfuture_impl.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qthreadpool.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qthread.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qexception.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qpromise.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qvariant.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/q23utility.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QString \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QThread \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QDateTime \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qdatetime.h \
 		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qcalendar.h \
-		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qlocale.h
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/qlocale.h \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QMap \
+		C:/Qt/6.8.2/llvm-mingw_64/include/QtCore/QStringList
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/main.o ../../main.cpp
 
 ####### Install
