@@ -8,4 +8,10 @@ DEFINES += ZMQ_STATIC
 LIBS += -L$$PWD/../lib -lws2_32 -lpthread -lIphlpapi -lzmq -lnzmqt
 INCLUDEPATH += $$PWD/../include
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    pet.cpp \
+    petmanager.cpp
+
+HEADERS += \
+    pet.h \
+    petmanager.h
