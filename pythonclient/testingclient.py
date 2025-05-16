@@ -2,10 +2,18 @@ import sys
 import zmq
 import threading
 import time
+from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTextEdit, QLineEdit, QVBoxLayout, QWidget
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal, QObject
+
+
+POLL_INTERVAL_MS = 100
+
+
+class SignalHandler(QObject):
+    log_signal = pyqtSignal(str)
 
 
 class BenternetClient(QMainWindow):
@@ -21,12 +29,12 @@ class BenternetClient(QMainWindow):
 
         self.subscriber = self.context.socket(zmq.SUB)
         self.subscriber.connect("tcp://benternet.pxl-ea-ict.be:24042")
-        self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "")  # Subscribe to all topics
+        self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "")
 
         self.message_history = []
         self.history_index = -1
 
-        # GUI components
+        # GUI setup
         self.output = QTextEdit()
         self.output.setReadOnly(True)
 
@@ -42,10 +50,22 @@ class BenternetClient(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
+        # Signal handler (thread-safe logger)
+        self.signals = SignalHandler()
+        self.signals.log_signal.connect(self.append_log)
+
         # Threading
         self.running = True
         self.receiver_thread = threading.Thread(target=self.receive_messages, daemon=True)
         self.receiver_thread.start()
+
+    def append_log(self, msg):
+        self.output.append(msg)
+
+    def log(self, label, msg):
+        timestamp = datetime.now().strftime("[%H:%M:%S]")
+        full_msg = f"{timestamp} [{label}] {msg}"
+        self.signals.log_signal.emit(full_msg)
 
     def send_message(self):
         text = self.input.text().strip()
@@ -54,30 +74,33 @@ class BenternetClient(QMainWindow):
 
         try:
             self.pusher.send_string(text)
-            self.output.append(f"[SENT] {text}")
+            self.log("SENT", text)
             self.message_history.append(text)
             self.history_index = len(self.message_history)
         except zmq.ZMQError as e:
-            self.output.append(f"[ERROR] Failed to send: {e}")
+            self.log("ERROR", f"Failed to send: {e}")
         finally:
             self.input.clear()
 
     def receive_messages(self):
+        poller = zmq.Poller()
+        poller.register(self.subscriber, zmq.POLLIN)
+
         while self.running:
             try:
-                if self.subscriber.poll(timeout=100):  # safer polling
+                socks = dict(poller.poll(POLL_INTERVAL_MS))
+                if self.subscriber in socks:
                     message = self.subscriber.recv_string()
-                    self.output.append(f"[RECEIVED] {message}")
+                    self.log("RECEIVED", message)
             except zmq.ZMQError:
-                break  # Likely caused by shutdown
+                break
 
     def closeEvent(self, event):
-        # Proper shutdown
         self.running = False
         self.receiver_thread.join(timeout=1)
         try:
-            self.subscriber.close(0)
-            self.pusher.close(0)
+            self.subscriber.close()
+            self.pusher.close()
             self.context.term()
         except zmq.ZMQError:
             pass
