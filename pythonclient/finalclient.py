@@ -217,31 +217,40 @@ class TamagotchiApp(QMainWindow):
     def handle_message(self, msg):
         self.debug_output.append(msg)
 
-        # Filter readable log output
-        if f"Tamagotchiland>PetPark?>" in msg and f">{self.pet_name}>" in msg:
-            readable = msg.split(f">{self.pet_name}>")[-1].strip()
-            self.message_log.append(f"Server: {readable}")
+        # Server-style filtering
+        if msg.startswith("Tamagotchiland>"):
+            if f">{self.pet_name}>" in msg:
+                readable = msg.split(f">{self.pet_name}>")[-1].strip()
+                self.message_log.append(f"Server: {readable}")
+            elif msg.startswith("Tamagotchiland>CreatePet?>"):
+                readable = msg.split("?>")[-1].strip()
+                self.message_log.append(f"Server: {readable}")
+            else:
+                self.message_log.append(f"Server: {msg}")
 
-        if "CreatePet?>" in msg:
-            if "Invalid" in msg or "already exists" in msg or "dark magic" in msg:
-                self.login_error.setText(msg.split(">")[-1])
-            elif self.pet_name in msg:
-                self.stack.setCurrentWidget(self.menu_widget)
+        # Login accepted or existing pet
+        if msg.startswith(f"Tamagotchiland>CreatePet?>{self.pet_name}"):
+            self.stack.setCurrentWidget(self.menu_widget)
+        if msg.endswith("try again") or "invalid" in msg.lower():
+            self.login_error.setText(msg.split(">")[-1])
 
-        if f"Tamagotchiland>PetPark?>{self.pet_name}>Stats>" in msg:
-            if "Hunger" in msg:
-                self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
-            elif "Hygiene" in msg:
-                self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
+        # Stats update
+        if f">Stats>Hunger>" in msg:
+            self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
+        elif f">Stats>Hygiene>" in msg:
+            self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
 
-        if f"Tamagotchiland>PetPark?>{self.pet_name}>Play>" in msg:
-            if "Yay you guessed it!" in msg:
+        # Game result
+        if f">Play>" in msg:
+            content = msg.split(">")[-1].strip().lower()
+            if "yay" in content or "guessed" in content:
                 self.guess_result.setText("Congrats, you guessed it!")
                 QTimer.singleShot(2000, lambda: self.stack.setCurrentWidget(self.menu_widget))
-            elif "n" in msg.lower():
+            elif content == "n":
                 self.guess_result.setText("No silly, try again!")
 
-        if f"Tamagotchiland>PetPark?>{self.pet_name}>Logs>" in msg:
+        # Logs
+        if f">Logs>" in msg:
             self.logs_output.append(msg.split(">")[-1])
 
     def closeEvent(self, event):

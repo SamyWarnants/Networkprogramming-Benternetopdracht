@@ -51,7 +51,7 @@ void PetManager::handleMessage(const QString& message) {
         } else if (action == "Play") {
             if (parts.size() == 4) {
                 pet->startGame();
-                logAndSend(pet, QString("Tamagotchiland>PetPark?>%1>Play>Okay I have a number start guessing").arg(name));
+                logAndSend(pet, QString("Tamagotchiland>PetPark?>%1>Play>Okay I have a number start guessing between 1 and 10!").arg(name));
             } else if (parts.size() == 5) {
                 bool ok;
                 int guess = parts[4].toInt(&ok);

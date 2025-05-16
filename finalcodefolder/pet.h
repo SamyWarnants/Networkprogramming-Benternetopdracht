@@ -1,16 +1,18 @@
+// pet.h
 #ifndef PET_H
 #define PET_H
 
 #include <QObject>
 #include <QTimer>
 #include <QStringList>
+#include <functional>
 
 class Pet : public QObject {
     Q_OBJECT
 
 public:
     explicit Pet(const QString& name, QObject* parent = nullptr);
-    void startNeglectTimer(std::function<void()> callback);
+    void startNeglectTimer(std::function<void()> callback, int intervalMs = 600000);
     void decay();
 
     void feed();
@@ -22,7 +24,7 @@ public:
     QStringList getLog() const;
     bool isAlive() const;
     QString getName() const;
-    void addToLog(const QString& entry);  // ✅ NEW METHOD
+    void addToLog(const QString& entry);
 
 private:
     QString name;
