@@ -1,9 +1,11 @@
+# Full Tamagotchiland GUI with pet mode selection, back buttons, and logout option
+
 import sys
 import zmq
 import threading
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton,
-    QLabel, QLineEdit, QTextEdit, QStackedWidget
+    QLabel, QLineEdit, QTextEdit, QStackedWidget, QHBoxLayout
 )
 from PyQt6.QtGui import QShortcut, QKeySequence
 from PyQt6.QtCore import QTimer
@@ -48,6 +50,7 @@ class TamagotchiApp(QMainWindow):
         self.resize(600, 500)
 
         self.pet_name = ""
+        self.login_mode = None
         self.zmq = ZMQHandler(self.handle_message)
 
         self.stack = QStackedWidget()
@@ -57,14 +60,14 @@ class TamagotchiApp(QMainWindow):
         self.message_log.setReadOnly(True)
         self.message_log.setFixedHeight(120)
 
-        self.login_screen()
+        self.login_mode_screen()
+        self.name_entry_screen()
         self.menu_screen()
         self.petpark_screen()
         self.petcare_screen()
         self.logs_screen()
-        self.debug_screen()
 
-        self.stack.setCurrentWidget(self.login_widget)
+        self.stack.setCurrentWidget(self.login_mode_widget)
 
     def add_to_stack(self, widget):
         layout = QVBoxLayout()
@@ -76,7 +79,31 @@ class TamagotchiApp(QMainWindow):
         self.stack.addWidget(container)
         return container
 
-    def login_screen(self):
+    def login_mode_screen(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Welcome to Tamagotchiland!"))
+        layout.addWidget(QLabel("What would you like to do?"))
+
+        create_btn = QPushButton("Create New Pet")
+        existing_btn = QPushButton("Use Existing Pet")
+
+        create_btn.clicked.connect(lambda: self.select_login_mode("create"))
+        existing_btn.clicked.connect(lambda: self.select_login_mode("existing"))
+
+        layout.addWidget(create_btn)
+        layout.addWidget(existing_btn)
+        widget.setLayout(layout)
+
+        self.login_mode_widget = self.add_to_stack(widget)
+
+    def select_login_mode(self, mode):
+        self.login_mode = mode
+        self.login_input.clear()
+        self.login_error.clear()
+        self.stack.setCurrentWidget(self.name_entry_widget)
+
+    def name_entry_screen(self):
         widget = QWidget()
         layout = QVBoxLayout()
         self.login_label = QLabel("Enter your pet name:")
@@ -84,21 +111,30 @@ class TamagotchiApp(QMainWindow):
         self.login_input.setPlaceholderText("e.g., Larry")
         self.login_error = QLabel("")
         self.login_error.setStyleSheet("color: red")
-        login_button = QPushButton("Login")
+
+        login_button = QPushButton("Continue")
+        back_button = QPushButton("Back")
+
         login_button.clicked.connect(self.try_login)
         self.login_input.returnPressed.connect(self.try_login)
+        back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.login_mode_widget))
+
         layout.addWidget(self.login_label)
         layout.addWidget(self.login_input)
         layout.addWidget(login_button)
+        layout.addWidget(back_button)
         layout.addWidget(self.login_error)
         widget.setLayout(layout)
-        self.login_widget = self.add_to_stack(widget)
+        self.name_entry_widget = self.add_to_stack(widget)
 
     def try_login(self):
         name = self.login_input.text().strip()
         if name:
             self.pet_name = name
-            self.zmq.send(f"Tamagotchiland>CreatePet!>Login>{name}")
+            if self.login_mode == "create":
+                self.zmq.send(f"Tamagotchiland>CreatePet!>Login>{name}")
+            else:
+                self.zmq.send(f"Tamagotchiland>CreatePet!>Existing>{name}")
         else:
             self.login_error.setText("Please enter a valid pet name.")
 
@@ -112,7 +148,7 @@ class TamagotchiApp(QMainWindow):
             ("PetPark", lambda: self.stack.setCurrentWidget(self.petpark_widget)),
             ("Petcare", lambda: self.stack.setCurrentWidget(self.petcare_widget)),
             ("Logs", lambda: self.stack.setCurrentWidget(self.logs_widget)),
-            ("Debug", lambda: self.stack.setCurrentWidget(self.debug_widget)),
+            ("Return to Pet Selection", self.return_to_pet_selection),
         ]:
             btn = QPushButton(text)
             btn.clicked.connect(handler)
@@ -128,6 +164,13 @@ class TamagotchiApp(QMainWindow):
 
         widget.setLayout(layout)
         self.menu_widget = self.add_to_stack(widget)
+
+    def return_to_pet_selection(self):
+        self.pet_name = ""
+        self.login_mode = None
+        self.login_input.clear()
+        self.login_error.clear()
+        self.stack.setCurrentWidget(self.login_mode_widget)
 
     def menu_up(self):
         self.current_menu_index = (self.current_menu_index - 1) % len(self.menu_buttons)
@@ -190,23 +233,12 @@ class TamagotchiApp(QMainWindow):
         refresh_btn.clicked.connect(lambda: self.zmq.send(f"Tamagotchiland>PetPark!>{self.pet_name}>Logs"))
         back_btn = QPushButton("Back")
         back_btn.clicked.connect(lambda: self.stack.setCurrentWidget(self.menu_widget))
+        layout.addWidget(QLabel("Logs & Debug Messages"))
         layout.addWidget(self.logs_output)
         layout.addWidget(refresh_btn)
         layout.addWidget(back_btn)
         widget.setLayout(layout)
         self.logs_widget = self.add_to_stack(widget)
-
-    def debug_screen(self):
-        widget = QWidget()
-        layout = QVBoxLayout()
-        self.debug_output = QTextEdit()
-        self.debug_output.setReadOnly(True)
-        back_btn = QPushButton("Back")
-        back_btn.clicked.connect(lambda: self.stack.setCurrentWidget(self.menu_widget))
-        layout.addWidget(self.debug_output)
-        layout.addWidget(back_btn)
-        widget.setLayout(layout)
-        self.debug_widget = self.add_to_stack(widget)
 
     def send_guess(self):
         guess = self.guess_input.text().strip()
@@ -215,41 +247,45 @@ class TamagotchiApp(QMainWindow):
             self.guess_result.setText("Waiting for response...")
 
     def handle_message(self, msg):
-        self.debug_output.append(msg)
+        self.logs_output.append(msg)
 
-        # Server-style filtering
         if msg.startswith("Tamagotchiland>"):
+            formatted = ""
             if f">{self.pet_name}>" in msg:
                 readable = msg.split(f">{self.pet_name}>")[-1].strip()
-                self.message_log.append(f"Server: {readable}")
+                formatted = f"Server: {readable}"
+            elif ">PetAttention>" in msg:
+                readable = msg.split(">")[-1]
+                formatted = f"⚠️ Server: {readable}"
+            elif "already exists" in msg.lower():
+                self.login_error.setText("This pet already exists. Try another name.")
             elif msg.startswith("Tamagotchiland>CreatePet?>"):
                 readable = msg.split("?>")[-1].strip()
-                self.message_log.append(f"Server: {readable}")
+                formatted = f"Server: {readable}"
             else:
-                self.message_log.append(f"Server: {msg}")
+                formatted = f"Server: {msg}"
 
-        # Login accepted or existing pet
+            if formatted:
+                self.message_log.append(formatted)
+
         if msg.startswith(f"Tamagotchiland>CreatePet?>{self.pet_name}"):
             self.stack.setCurrentWidget(self.menu_widget)
+
         if msg.endswith("try again") or "invalid" in msg.lower():
             self.login_error.setText(msg.split(">")[-1])
 
-        # Stats update
         if f">Stats>Hunger>" in msg:
             self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
         elif f">Stats>Hygiene>" in msg:
             self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
 
-        # Game result
         if f">Play>" in msg:
-            content = msg.split(">")[-1].strip().lower()
-            if "yay" in content or "guessed" in content:
+            if msg.endswith(">Play>n"):
+                self.guess_result.setText("No silly, try again!")
+            elif "guessed it" in msg.lower():
                 self.guess_result.setText("Congrats, you guessed it!")
                 QTimer.singleShot(2000, lambda: self.stack.setCurrentWidget(self.menu_widget))
-            elif content == "n":
-                self.guess_result.setText("No silly, try again!")
 
-        # Logs
         if f">Logs>" in msg:
             self.logs_output.append(msg.split(">")[-1])
 

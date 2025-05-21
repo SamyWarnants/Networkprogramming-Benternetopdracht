@@ -195,12 +195,25 @@ To run the project, follow these steps:
    ```bash
    git clone https://github.com/SamyWarnants/Networkprogramming-Benternetopdracht.git
    ```
+
 2. **Create an account on [Qt group](https://www.qt.io/download-dev) and download the following packages:**
-   
+
    - (For Windows it is setup like this):
      ![Overview](./Resources/qtsetup.png)
+
 3. **Now you can go to the project folder and open the project inside of it**:
+
 4. **Now you can run the game! Congratulations!! (It can be that the terminal won't let you have input to fix this go to projects=>Run=> and enable run in terminal.**
+
+5. **Finally there is the buildguide for the client for this you will need to install python by either opening powershell and doing it there or by downloading the installer that can be found [here](https://www.python.org/downloads/)**
+
+6. **After that is complete you will need to open the powershell terminal and input the following command :**
+
+   `pip install pyqt6 pyzmq`
+
+7. **Now head over to [this folder](pythonclient/finalclient.py). And that is it your ready to go!!**
+
+   
 
 
 ## People
