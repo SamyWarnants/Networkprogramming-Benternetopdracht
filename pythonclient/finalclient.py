@@ -1,11 +1,9 @@
-# Full Tamagotchiland GUI with pet mode selection, back buttons, and logout option
-
 import sys
 import zmq
 import threading
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton,
-    QLabel, QLineEdit, QTextEdit, QStackedWidget, QHBoxLayout
+    QLabel, QLineEdit, QTextEdit, QStackedWidget
 )
 from PyQt6.QtGui import QShortcut, QKeySequence
 from PyQt6.QtCore import QTimer
@@ -47,7 +45,7 @@ class TamagotchiApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tamagotchiland Chatbot Client")
-        self.resize(600, 500)
+        self.resize(700, 600)
 
         self.pet_name = ""
         self.login_mode = None
@@ -59,6 +57,10 @@ class TamagotchiApp(QMainWindow):
         self.message_log = QTextEdit()
         self.message_log.setReadOnly(True)
         self.message_log.setFixedHeight(120)
+
+        self.debug_output = QTextEdit()
+        self.debug_output.setReadOnly(True)
+        self.debug_output.setFixedHeight(100)
 
         self.login_mode_screen()
         self.name_entry_screen()
@@ -74,6 +76,8 @@ class TamagotchiApp(QMainWindow):
         layout.addWidget(widget)
         layout.addWidget(QLabel("Service Messages:"))
         layout.addWidget(self.message_log)
+        layout.addWidget(QLabel("Raw Server Log:"))
+        layout.addWidget(self.debug_output)
         container = QWidget()
         container.setLayout(layout)
         self.stack.addWidget(container)
@@ -131,10 +135,7 @@ class TamagotchiApp(QMainWindow):
         name = self.login_input.text().strip()
         if name:
             self.pet_name = name
-            if self.login_mode == "create":
-                self.zmq.send(f"Tamagotchiland>CreatePet!>Login>{name}")
-            else:
-                self.zmq.send(f"Tamagotchiland>CreatePet!>Existing>{name}")
+            self.zmq.send(f"Tamagotchiland>CreatePet!>Login>{name}")
         else:
             self.login_error.setText("Please enter a valid pet name.")
 
@@ -187,14 +188,23 @@ class TamagotchiApp(QMainWindow):
         widget = QWidget()
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Make a guess between 1 and 10:"))
+
         self.guess_input = QLineEdit()
         self.guess_input.setPlaceholderText("Enter a number...")
+
         self.guess_result = QLabel()
+
+        start_button = QPushButton("Start Game")
+        start_button.clicked.connect(lambda: self.zmq.send(f"Tamagotchiland>PetPark!>{self.pet_name}>Play"))
+
         guess_button = QPushButton("Submit Guess")
         guess_button.clicked.connect(self.send_guess)
         self.guess_input.returnPressed.connect(self.send_guess)
+
         back_button = QPushButton("Back")
         back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.menu_widget))
+
+        layout.addWidget(start_button)
         layout.addWidget(self.guess_input)
         layout.addWidget(guess_button)
         layout.addWidget(self.guess_result)
@@ -247,7 +257,7 @@ class TamagotchiApp(QMainWindow):
             self.guess_result.setText("Waiting for response...")
 
     def handle_message(self, msg):
-        self.logs_output.append(msg)
+        self.debug_output.append(msg)
 
         if msg.startswith("Tamagotchiland>"):
             formatted = ""
@@ -257,8 +267,6 @@ class TamagotchiApp(QMainWindow):
             elif ">PetAttention>" in msg:
                 readable = msg.split(">")[-1]
                 formatted = f"⚠️ Server: {readable}"
-            elif "already exists" in msg.lower():
-                self.login_error.setText("This pet already exists. Try another name.")
             elif msg.startswith("Tamagotchiland>CreatePet?>"):
                 readable = msg.split("?>")[-1].strip()
                 formatted = f"Server: {readable}"
@@ -268,25 +276,35 @@ class TamagotchiApp(QMainWindow):
             if formatted:
                 self.message_log.append(formatted)
 
-        if msg.startswith(f"Tamagotchiland>CreatePet?>{self.pet_name}"):
-            self.stack.setCurrentWidget(self.menu_widget)
+        if msg.startswith("Tamagotchiland>CreatePet?>"):
+            lower_msg = msg.lower()
 
-        if msg.endswith("try again") or "invalid" in msg.lower():
-            self.login_error.setText(msg.split(">")[-1])
+            if "already exists" in lower_msg:
+                if self.login_mode == "create":
+                    self.login_error.setText("This pet already exists. Try another name.")
+                else:
+                    self.stack.setCurrentWidget(self.menu_widget)
+
+            elif self.pet_name.lower() in msg.lower():
+                self.stack.setCurrentWidget(self.menu_widget)
+
+            elif "invalid" in lower_msg or "dark magic" in lower_msg or "try again" in lower_msg:
+                self.login_error.setText(msg.split(">")[-1])
 
         if f">Stats>Hunger>" in msg:
             self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
         elif f">Stats>Hygiene>" in msg:
             self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
 
-        if f">Play>" in msg:
-            if msg.endswith(">Play>n"):
+        if ">Play>" in msg:
+            content = msg.split(">")[-1].strip().lower()
+            if content == "n":
                 self.guess_result.setText("No silly, try again!")
-            elif "guessed it" in msg.lower():
+            elif "guessed" in content:
                 self.guess_result.setText("Congrats, you guessed it!")
                 QTimer.singleShot(2000, lambda: self.stack.setCurrentWidget(self.menu_widget))
 
-        if f">Logs>" in msg:
+        if ">Logs>" in msg:
             self.logs_output.append(msg.split(">")[-1])
 
     def closeEvent(self, event):
