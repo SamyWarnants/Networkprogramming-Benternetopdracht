@@ -62,6 +62,13 @@ class TamagotchiApp(QMainWindow):
         self.debug_output.setReadOnly(True)
         self.debug_output.setFixedHeight(100)
 
+        # Predefine attributes to prevent NoneType issues
+        self.feed_label = QLabel("Feeding: ?")
+        self.clean_label = QLabel("Cleaning: ?")
+        self.guess_result = QLabel()
+        self.logs_output = QTextEdit()
+        self.logs_output.setReadOnly(True)
+
         self.login_mode_screen()
         self.name_entry_screen()
         self.menu_screen()
@@ -192,8 +199,6 @@ class TamagotchiApp(QMainWindow):
         self.guess_input = QLineEdit()
         self.guess_input.setPlaceholderText("Enter a number...")
 
-        self.guess_result = QLabel()
-
         start_button = QPushButton("Start Game")
         start_button.clicked.connect(lambda: self.zmq.send(f"Tamagotchiland>PetPark!>{self.pet_name}>Play"))
 
@@ -215,8 +220,6 @@ class TamagotchiApp(QMainWindow):
     def petcare_screen(self):
         widget = QWidget()
         layout = QVBoxLayout()
-        self.feed_label = QLabel("Feeding: ?")
-        self.clean_label = QLabel("Cleaning: ?")
         feed_btn = QPushButton("Feed")
         feed_btn.clicked.connect(lambda: self.zmq.send(f"Tamagotchiland>PetPark!>{self.pet_name}>Petcare>Feeding"))
         clean_btn = QPushButton("Clean")
@@ -237,8 +240,6 @@ class TamagotchiApp(QMainWindow):
     def logs_screen(self):
         widget = QWidget()
         layout = QVBoxLayout()
-        self.logs_output = QTextEdit()
-        self.logs_output.setReadOnly(True)
         refresh_btn = QPushButton("Refresh Logs")
         refresh_btn.clicked.connect(lambda: self.zmq.send(f"Tamagotchiland>PetPark!>{self.pet_name}>Logs"))
         back_btn = QPushButton("Back")
@@ -278,25 +279,22 @@ class TamagotchiApp(QMainWindow):
 
         if msg.startswith("Tamagotchiland>CreatePet?>"):
             lower_msg = msg.lower()
-
             if "already exists" in lower_msg:
                 if self.login_mode == "create":
                     self.login_error.setText("This pet already exists. Try another name.")
                 else:
                     self.stack.setCurrentWidget(self.menu_widget)
-
             elif self.pet_name.lower() in msg.lower():
                 self.stack.setCurrentWidget(self.menu_widget)
-
             elif "invalid" in lower_msg or "dark magic" in lower_msg or "try again" in lower_msg:
                 self.login_error.setText(msg.split(">")[-1])
 
-        if f">Stats>Hunger>" in msg:
+        if f">Stats>Hunger>" in msg and hasattr(self, "feed_label"):
             self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
-        elif f">Stats>Hygiene>" in msg:
+        elif f">Stats>Hygiene>" in msg and hasattr(self, "clean_label"):
             self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
 
-        if ">Play>" in msg:
+        if ">Play>" in msg and hasattr(self, "guess_result"):
             content = msg.split(">")[-1].strip().lower()
             if content == "n":
                 self.guess_result.setText("No silly, try again!")
@@ -304,7 +302,7 @@ class TamagotchiApp(QMainWindow):
                 self.guess_result.setText("Congrats, you guessed it!")
                 QTimer.singleShot(2000, lambda: self.stack.setCurrentWidget(self.menu_widget))
 
-        if ">Logs>" in msg:
+        if ">Logs>" in msg and hasattr(self, "logs_output"):
             self.logs_output.append(msg.split(">")[-1])
 
     def closeEvent(self, event):
