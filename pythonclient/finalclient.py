@@ -52,23 +52,35 @@ class TamagotchiApp(QMainWindow):
         self.zmq = ZMQHandler(self.handle_message)
 
         self.stack = QStackedWidget()
-        self.setCentralWidget(self.stack)
 
         self.message_log = QTextEdit()
         self.message_log.setReadOnly(True)
-        self.message_log.setFixedHeight(120)
+        self.message_log.setFixedHeight(100)
 
         self.debug_output = QTextEdit()
         self.debug_output.setReadOnly(True)
         self.debug_output.setFixedHeight(100)
 
-        # Predefine attributes to prevent NoneType issues
+        # Assemble main layout with persistent logs at bottom
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.stack)
+        main_layout.addWidget(QLabel("Service Messages:"))
+        main_layout.addWidget(self.message_log)
+        main_layout.addWidget(QLabel("Raw Server Log:"))
+        main_layout.addWidget(self.debug_output)
+
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.setCentralWidget(container)
+
+        # Predefine key widgets to prevent NoneType crashes
         self.feed_label = QLabel("Feeding: ?")
         self.clean_label = QLabel("Cleaning: ?")
         self.guess_result = QLabel()
         self.logs_output = QTextEdit()
         self.logs_output.setReadOnly(True)
 
+        # Build all screens
         self.login_mode_screen()
         self.name_entry_screen()
         self.menu_screen()
@@ -79,13 +91,9 @@ class TamagotchiApp(QMainWindow):
         self.stack.setCurrentWidget(self.login_mode_widget)
 
     def add_to_stack(self, widget):
+        container = QWidget()
         layout = QVBoxLayout()
         layout.addWidget(widget)
-        layout.addWidget(QLabel("Service Messages:"))
-        layout.addWidget(self.message_log)
-        layout.addWidget(QLabel("Raw Server Log:"))
-        layout.addWidget(self.debug_output)
-        container = QWidget()
         container.setLayout(layout)
         self.stack.addWidget(container)
         return container
@@ -289,12 +297,12 @@ class TamagotchiApp(QMainWindow):
             elif "invalid" in lower_msg or "dark magic" in lower_msg or "try again" in lower_msg:
                 self.login_error.setText(msg.split(">")[-1])
 
-        if f">Stats>Hunger>" in msg and hasattr(self, "feed_label"):
+        if f">Stats>Hunger>" in msg:
             self.feed_label.setText(f"Feeding: {msg.split('>')[-1]}")
-        elif f">Stats>Hygiene>" in msg and hasattr(self, "clean_label"):
+        elif f">Stats>Hygiene>" in msg:
             self.clean_label.setText(f"Cleaning: {msg.split('>')[-1]}")
 
-        if ">Play>" in msg and hasattr(self, "guess_result"):
+        if ">Play>" in msg:
             content = msg.split(">")[-1].strip().lower()
             if content == "n":
                 self.guess_result.setText("No silly, try again!")
@@ -302,7 +310,7 @@ class TamagotchiApp(QMainWindow):
                 self.guess_result.setText("Congrats, you guessed it!")
                 QTimer.singleShot(2000, lambda: self.stack.setCurrentWidget(self.menu_widget))
 
-        if ">Logs>" in msg and hasattr(self, "logs_output"):
+        if ">Logs>" in msg:
             self.logs_output.append(msg.split(">")[-1])
 
     def closeEvent(self, event):
