@@ -1,0 +1,20 @@
+{
+    "globalCoins": 9749,
+    "pets": [
+        {
+            "alive": true,
+            "coins": 70,
+            "name": "Bart"
+        },
+        {
+            "alive": true,
+            "coins": 0,
+            "name": "Billy"
+        },
+        {
+            "alive": true,
+            "coins": 30,
+            "name": "Mart"
+        }
+    ]
+}
